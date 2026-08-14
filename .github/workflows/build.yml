@@ -1,4 +1,4 @@
-name: Build Windows App (EXE)
+name: Build Android APK (Lightweight)
 
 on:
   push:
@@ -6,11 +6,17 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Set up Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -22,20 +28,20 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Enable Windows Desktop support
-        run: flutter config --enable-windows-desktop
-
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
           pip install flet flet-cli
 
-      - name: Build Windows App
+      - name: Build APK (Targeting ARM64 only)
         run: |
-          flet build windows
+          flet build apk --target-platform android-arm64
 
-      - name: Upload Windows App Executable
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: jhotpot-share-windows-pc
-          path: build/windows/x64/runner/Release/
+          name: jhotpot-share-apk
+          path: |
+            build/apk/*.apk
+            dist/*.apk
+            **/*.apk
